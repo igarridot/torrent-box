@@ -1,2 +1,2 @@
 # torrent-box
-docker-compose setup for radar, sonarr, lidarr, jackett and ombi
+docker-compose setup for transmission, radar, sonarr, lidarr, jackett and ombi
