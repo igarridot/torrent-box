@@ -1,0 +1,122 @@
+version: '3'
+services:
+  radarr:
+    image: linuxserver/radarr:4.2.4
+    container_name: radarr
+    restart: always
+    ports:
+      - 7878:7878
+    volumes:
+      - ./data/radarr:/config
+      - ./data/radarr-multimedia:/mnt/multimedia
+      - ./data/multimedia:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+  sonarr:
+    image: linuxserver/sonarr:3.0.9
+    container_name: sonarr
+    restart: always
+    ports:
+      - 8989:8989
+    volumes:
+      - ./data/sonarr:/config
+      - ./data/radarr-multimedia:/mnt/multimedia
+      - ./data/multimedia:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+  jackett:
+    image: linuxserver/jackett:0.20.2093
+    container_name: jackett
+    restart: always
+    ports:
+      - 9117:9117
+    volumes:
+      - ./data/jackett:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+  plex:
+    image: lscr.io/linuxserver/plex:1.29.0
+    container_name: plex
+    ports:
+      - 32400:32400
+      - 3005:3005
+      - 8324:8324
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+      - 32469:32469
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+      - PLEX_CLAIM= #optional
+    volumes:
+      - ./data/plex:/config
+      - ./data/multimedia:/downloads-transmission
+      - ./data/radarr-multimedia:/downloads-radarr-sonarr
+    restart: always
+  ombi:
+    image: linuxserver/ombi:4.22.5
+    container_name: ombi
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - BASE_URL=/ #optional
+    volumes:
+      - ./data/ombi:/config
+    ports:
+      - 3579:3579
+    restart: always
+  transmission:
+    image: lscr.io/linuxserver/transmission:3.00-r5-ls137
+    container_name: transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./data/transmission-config:/config
+      - ./data/multimedia:/downloads
+      - ./data/transmission-watch:/watch
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: always
+##  flaresolverr:
+##    image: flaresolverr/flaresolverr:v2.2.9
+##    container_name: flaresolverr
+##    environment:
+##      - LOG_LEVEL=${LOG_LEVEL:-info}
+##      - LOG_HTML=${LOG_HTML:-false}
+##      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+##      - TZ=Europe/Madrid
+##    ports:
+##      - "${PORT:-8191}:8191"
+##    restart: always
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    user: 1000:1000
+    #network_mode: 'host'
+    ports:
+      - 8096:8096
+    volumes:
+    #  - /path/to/config:/config
+      - ./data/jellyfin/cache:/cache
+      - ./data/multimedia:/media
+    restart: 'unless-stopped'
+    # Optional - alternative address used for autodiscovery
+    #environment:
+    #  - JELLYFIN_PublishedServerUrl=http://example.com
+    # Optional - may be necessary for docker healthcheck to pass if running in host network mode
+    #extra_hosts:
+    #  - "host.docker.internal:host-gateway"
